@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const WavDecoder = require('wav-decoder');
 
-
 const decode = fileName => {
   const filePath = path.resolve(__dirname, '../', 'assets', fileName);
   const readFile = filepath => {
