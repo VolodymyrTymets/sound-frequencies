@@ -5,8 +5,10 @@ const decode = require('./src/wav-stream-decoder');
 const { fft, getEnergy } = require('./src/fft');
 const getMic = require('./src/mic');
 var fs = require('fs');
+const colors = require('colors');
+var bufferConcat = require('buffer-concat');
 
-const FILE_NAME = './output.wav';
+const FILE_NAME = './assets/output.raw';
 
 const micSettings = {
   rate: 44100,
@@ -14,7 +16,7 @@ const micSettings = {
   bitwidth: 16,
   debug: false,
   exitOnSilence: 6,
-  device: 'plughw:1',
+  device: 'plughw:0',
   fileType: 'wav',
 };
 
@@ -29,46 +31,43 @@ const decodeFormat  =  {
 };
 
 const mic = getMic(FILE_NAME, micSettings);
-
+const energys = []
 let audioData = [];
+let buffer = new Buffer([]);
 
 mic.micInputStream.on('data', function(data) {
-  //console.log("Recieved Input Stream: " + data.length);
+  buffer = bufferConcat([buffer, data]);
   decode(data).then(audio => {
-    //console.log(audio.channelData[0].length);
-
-    //const more = audio.channelData[0].find(value => value > 0);
-    //console.log('more than 0 >', more);
-
     audioData = audioData.concat(_.values(audio.channelData[0]));
 
   }).catch(logError);
 });
 
-mic.micInputStream.on('stopComplete', () => {
-  decoder(FILE_NAME)
-    .then(audioData => {
-      console.log(audioData.channelData[0].length)
-      const { spectrum }  = fft(_.values(audioData.channelData[0]));
-      const energy = getEnergy(spectrum , 10);
-      console.log('energy ->', energy)
-    })
-    .catch(logError);
-});
-
-
 const outputFileStream = fs.WriteStream(FILE_NAME);
-mic.micInputStream.pipe(outputFileStream);
+//mic.micInputStream.pipe(outputFileStream);
 
 mic.micInstance.start();
 
-setTimeout(() => {
-  mic.micInstance.stop()
+const interval = setInterval(() => {
   console.log(audioData.length)
   const { spectrum }  = fft(audioData);
-  audioData = [];
+
   const energy = getEnergy(spectrum , 10);
-  console.log('energy ->', energy)
+
+  energys.push(energy);
+  if(energy > 0.06) {
+      console.log('energy ->', colors.green(energy))
+      outputFileStream.write(buffer)
+  } else {
+      console.log('energy ->', colors.red(energy))
+  }
+  audioData = [];
+  buffer = new Buffer([]);
 }, 1000);
 
-
+setTimeout(() => {
+  clearInterval(interval);
+  outputFileStream.end();
+  mic.micInstance.stop()
+  console.log('max ->',_.max(energys))
+}, 20000);

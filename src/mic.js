@@ -14,15 +14,15 @@ const MIC_SETTINGS = {
 
 const getMicInputStream = (fileName, micSettings) => {
 
-  const filePath = path.resolve(__dirname, '../', 'assets', fileName);
+  //const filePath = path.resolve(__dirname, '../', 'assets', fileName);
 
   const micInstance = mic(micSettings || MIC_SETTINGS);
 
   const micInputStream = micInstance.getAudioStream();
 
-  const outputFileStream = fs.WriteStream(filePath);
+  //const outputFileStream = fs.WriteStream(filePath);
 
-  micInputStream.pipe(outputFileStream);
+  //micInputStream.pipe(outputFileStream);
 
   micInputStream.on('error', logError);
   return { micInputStream, micInstance };

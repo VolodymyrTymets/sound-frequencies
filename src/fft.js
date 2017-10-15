@@ -46,9 +46,10 @@ const getEnergy = (spectrum, l) => {
   for(let index = 0; index < toCalculation.length - 1; index ++) {
     const a = toCalculation[index].amplitude;
     const b = toCalculation[index + 1].frequency - toCalculation[index].frequency;
-    squeres.push(a * b);
+    const s = Math.pow(a * b, 2);
+    squeres.push(s);
   }
-
+  console.log(squeres.length)
   return _.sum(squeres);
 };
 
