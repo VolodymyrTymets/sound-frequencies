@@ -7,6 +7,8 @@ const getMic = require('./src/mic');
 var fs = require('fs');
 const colors = require('colors');
 var bufferConcat = require('buffer-concat');
+const Gpio = require('onoff').Gpio;
+const out = new Gpio(17, 'out');
 
 const FILE_NAME = './assets/output.raw';
 
@@ -47,7 +49,7 @@ const outputFileStream = fs.WriteStream(FILE_NAME);
 //mic.micInputStream.pipe(outputFileStream);
 
 mic.micInstance.start();
-
+out.writeSync(1);
 const interval = setInterval(() => {
   console.log(audioData.length)
   const { spectrum }  = fft(audioData);
@@ -66,6 +68,7 @@ const interval = setInterval(() => {
 }, 1000);
 
 setTimeout(() => {
+  out.writeSync(0);
   clearInterval(interval);
   outputFileStream.end();
   mic.micInstance.stop()
