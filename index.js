@@ -49,7 +49,7 @@ const outputFileStream = fs.WriteStream(FILE_NAME);
 //mic.micInputStream.pipe(outputFileStream);
 
 mic.micInstance.start();
-out.writeSync(1);
+
 const interval = setInterval(() => {
   console.log(audioData.length)
   const { spectrum }  = fft(audioData);
@@ -58,6 +58,7 @@ const interval = setInterval(() => {
 
   energys.push(energy);
   if(energy > 0.06) {
+      out.writeSync(1);
       console.log('energy ->', colors.green(energy))
       outputFileStream.write(buffer)
   } else {
