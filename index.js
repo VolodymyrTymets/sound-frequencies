@@ -16,7 +16,7 @@ const micSettings = {
   bitwidth: 16,
   debug: false,
   exitOnSilence: 6,
-  device: 'plughw:0',
+  device: `plughw:${process.argv[2] || '1'}`,
   fileType: 'wav',
 };
 
