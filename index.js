@@ -62,6 +62,7 @@ const interval = setInterval(() => {
       console.log('energy ->', colors.green(energy))
       outputFileStream.write(buffer)
   } else {
+      out.writeSync(0);
       console.log('energy ->', colors.red(energy))
   }
   audioData = [];
