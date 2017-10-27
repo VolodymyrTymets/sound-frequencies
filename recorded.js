@@ -27,22 +27,23 @@ const getRecorded = async () => {
 
     const lowRange = audioData.channelData[0];
 
-    const toFFT = [];
+    const slices = [];
 
     for (let index = 0; index < lowRange.length; index = index + N) {
       const slice = lowRange.slice(index, index + N);
       const mean = _.meanBy(slice, Math.abs);
 
       if(mean > MEAN - MEAN * PERSENT) {
-        toFFT.push(mean);
+        slices.push(_.values(slice));
       }
     }
 
     console.log('mean ->', getMean(lowRange));
-    console.log('means ->', toFFT.length);
+    console.log('means ->', slices.length);
     console.log('from ->', (lowRange.length / N));
 
-    const { spectrum } = fft(toFFT);
+    console.log('toFFt ->', _.flatten(slices).length);
+    const { spectrum } = fft(_.flatten(slices));
     const energy = getEnergy(spectrum , 10);
 
     console.log(`energy of [${name}] ->`, energy);
