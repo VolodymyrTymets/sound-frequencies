@@ -49,7 +49,7 @@ const getEnergy = (spectrum, l) => {
     const s = Math.pow(a * b, 2);
     squeres.push(s);
   }
-  console.log(squeres.length)
+  console.log('squeres -> ', squeres.length)
   return _.sum(squeres);
 };
 
