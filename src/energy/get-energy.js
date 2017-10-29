@@ -21,6 +21,7 @@ const getIndexOfMax = spectrum => {
 
 const getEnergy = (spectrum, L = 10) => {
   const indexOfMax = getIndexOfMax(spectrum);  
+  console.log('maxAmplitude -> ', spectrum[indexOfMax].amplitude)
 
   // build arra to calculate energy +-l from max amplitude
   const toCalculation = [];
