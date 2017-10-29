@@ -19,9 +19,10 @@
     "lodash": "^4.17.4",
     "mathjs": "^3.16.4",
     "mic": "^2.1.1",
+    "node-wav": "0.0.2",
     "onoff": "^1.1.8",
     "path": "^0.12.7",
     "read-chunk": "^2.0.0",
-    "wav-decoder": "^1.1.1"
+    "waveheader": "0.0.2"
   }
 }

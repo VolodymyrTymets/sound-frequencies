@@ -3,7 +3,7 @@ const path = require('path');
 const WavDecoder = require('wav-decoder');
 
 const decode = fileName => {
-  const filePath = path.resolve(__dirname, '../', 'assets', fileName);
+  const filePath = path.resolve(__dirname, '../../', 'assets', fileName);
   const readFile = filepath => {
     return new Promise((resolve, reject) => {
       fs.readFile(filepath, (err, buffer) => {
