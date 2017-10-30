@@ -32,7 +32,7 @@ segmenter.on('noSegment', () => {
   //console.log('no')
 });
 
-const mic = getMic(micSettings, 'record.wav');
+const mic = getMic(micSettings, 'record');
 mic.micInputStream.on('data', function(buffer) {
   wavStreamDecode1(buffer)
   .then(audioData => { 

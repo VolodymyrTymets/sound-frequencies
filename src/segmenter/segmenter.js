@@ -44,7 +44,7 @@ class Segmentor extends EventEmitter {
        
       if(sum < SUM_OF_100 - SUM_OF_100 * FLUFF || index + N >= wave.length) {
         if(this._waves.length > COUNT_OF_BLOCKS) {
-          console.log('waves ->', this._waves.length)
+          // console.log('waves ->', this._waves.length)
           this.emit('segment', _.flatten(this._waves));  
         }
         this._waves = [];
@@ -53,6 +53,7 @@ class Segmentor extends EventEmitter {
         this._waves.push(_.values(slice));  
       }
     }
+  }
   
   findSegmantTest(wave) {
     const sum = this.getSum(wave)

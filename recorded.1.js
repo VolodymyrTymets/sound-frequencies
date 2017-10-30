@@ -10,7 +10,7 @@ const segmenter = new Segmenter();
 
 segmenter.on('segment', segment => { 
   if(segment.length < 10000) return
-  console.log('segment.length ->', segment.length)
+  //console.log('segment.length ->', segment.length)
   const { spectrum } = fft(segment);
   const energy = getEnergy(spectrum , 10);
 
