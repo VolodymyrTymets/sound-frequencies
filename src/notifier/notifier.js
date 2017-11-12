@@ -1,9 +1,8 @@
-
 const colors = require('colors');
 const fs = require('fs');
 const wav = require('wav');
 const Speaker = require('speaker');
-const play = require('play');
+
 const path = require('path');
 
 const notifyLog = (type, energy) => {
