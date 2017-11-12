@@ -1,78 +1,44 @@
 const _ = require('lodash');
-const logError = require('./src/log-error');
-const decoder = require('./src/wav-decoder');
-const decode = require('./src/wav-stream-decoder');
-const { fft, getEnergy } = require('./src/fft');
-const getMic = require('./src/mic');
-var fs = require('fs');
 const colors = require('colors');
-var bufferConcat = require('buffer-concat');
-const Gpio = require('onoff').Gpio;
-const out = new Gpio(17, 'out');
+// const Gpio = require('onoff').Gpio;
+//const out = new Gpio(17, 'out');
 
-const FILE_NAME = './assets/output.raw';
+const { wavStreamDecode1 } = require('./src/wav');
+const { fft } = require('./src/fft');
+const { getEnergy } = require('./src/energy');
+const getMic = require('./src/mic');
+const logError = require('./src/log-error');
+const { micSettings, ENERGY, FLUFF } = require('./src/config');
+let wav = require('node-wav');
 
-const micSettings = {
-  rate: 44100,
-  channels: 2,
-  bitwidth: 16,
-  debug: false,
-  exitOnSilence: 6,
-  device: `plughw:${process.argv[2] || '1'}`,
-  fileType: 'wav',
-};
+let buffers = [];
 
-const decodeFormat  =  {
-  formatId: 28980,
-  floatingPoint: false,
-  numberOfChannels: micSettings.channels,
-  sampleRate: micSettings.rate,
-  byteRate: micSettings.rate,
-  blockSize: micSettings.bitwidth,
-  bitDepth: micSettings.bitwidth
-};
+let MAX = 0;
 
-const mic = getMic(FILE_NAME, micSettings);
-const energys = []
-let audioData = [];
-let buffer = new Buffer([]);
+const mic = getMic(micSettings);
+mic.micInputStream.on('data', function(buffer) {
+  buffers.push(buffer);
 
-mic.micInputStream.on('data', function(data) {
-  buffer = bufferConcat([buffer, data]);
-  decode(data).then(audio => {
-    audioData = audioData.concat(_.values(audio.channelData[0]));
+  if(buffers.length > 10) {
+    wavStreamDecode1(Buffer.concat(buffers))
+      .then(audioData => {
+        const wave = audioData.channelData[0];
+        const { spectrum } = fft(wave);
+        const energy = getEnergy(spectrum , 10);
 
-  }).catch(logError);
+        MAX = energy > MAX ? energy : MAX;
+        // console.log('energy ->', colors.red(energy))
+        if (energy > MAX - MAX * FLUFF && energy < MAX + MAX * FLUFF) {
+          console.log('energy ->', colors.green(energy))
+        } else {
+          console.log('energy ->', colors.red(energy))
+        }
+      })
+      .catch(logError);
+    buffers = [];
+  };
 });
 
-const outputFileStream = fs.WriteStream(FILE_NAME);
-//mic.micInputStream.pipe(outputFileStream);
 
 mic.micInstance.start();
-
-const interval = setInterval(() => {
-  console.log(audioData.length)
-  const { spectrum }  = fft(audioData);
-
-  const energy = getEnergy(spectrum , 10);
-
-  energys.push(energy);
-  if(energy > 0.06) {
-      out.writeSync(1);
-      console.log('energy ->', colors.green(energy))
-      outputFileStream.write(buffer)
-  } else {
-      out.writeSync(0);
-      console.log('energy ->', colors.red(energy))
-  }
-  audioData = [];
-  buffer = new Buffer([]);
-}, 1000);
-
-setTimeout(() => {
-  out.writeSync(0);
-  clearInterval(interval);
-  outputFileStream.end();
-  mic.micInstance.stop()
-  console.log('max ->',_.max(energys))
-}, 20000);
+console.log('-------> start')

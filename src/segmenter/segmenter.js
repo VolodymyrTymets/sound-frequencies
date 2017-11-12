@@ -3,7 +3,7 @@ const { EventEmitter } = require('events');
 const { SUM_OF_100, FLUFF } = require('../config');
 
 const N = 100;
-const COUNT_OF_BLOCKS = 50;
+const COUNT_OF_BLOCKS = 100;
 
 /**
  * Provide filter wave
@@ -28,7 +28,7 @@ class Segmentor extends EventEmitter {
         const mean = _.sumBy(slice, Math.abs);
         means.push(mean);
     }
-    return _.mean(_.flatten(means));
+    return _.min(_.flatten(means));
   };  
 
  /**
