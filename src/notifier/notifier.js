@@ -2,6 +2,7 @@ const colors = require('colors');
 const fs = require('fs');
 const wav = require('wav');
 const Speaker = require('speaker');
+var Sound = require('node-aplay');
 
 const path = require('path');
 
@@ -23,12 +24,17 @@ const notifySound = (type, energy) => {
     reader.on('format', format =>
       reader.pipe(new Speaker(format)));
     file.pipe(reader);
-  };  
+  }; 
+  
+  const playType1 = type => {
+    new Sound(path.resolve(__dirname, '../../', `assets/out/${type}.wav`)).play();
+  }; 
+  
   switch(type) {
     case 'muscle':  
-      return playType('muscle')
+      return playType1('muscle')
     case 'nerve': 
-      return playType('nerve')
+      return playType1('nerve')
     default: 
      return ; 
   }
