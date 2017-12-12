@@ -61,7 +61,7 @@ class Segmentor extends EventEmitter {
    if (average < LIMIT_OF_SILENCE) {
      const segment = _.flatten(this._waves);
      // todo  test value
-     if (segment.length > 10000) {
+     if (segment.length > 50000) {
        this._saveSegment(this._buffers, segment);
        this.emit('segment', segment);
      }
