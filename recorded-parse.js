@@ -2,7 +2,6 @@ const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 const colors = require('colors');
-const { wavDecode } = require('./src/wav');
 const header = require("waveheader");
 const { fft } = require('./src/fft');
 const { getEnergy } = require('./src/energy');
@@ -14,16 +13,19 @@ const { NERVE_LOW_ENERGY, NERVE_UP_ENERGY, MUSCLE_LOW_ENERGY, MUSCLE_UP_ENERGY, 
 const segmenter = new Segmenter();
 const notifyMode = ['console', 'sound', 'gpio'];
 
-segmenter.on('segment', (segment, buffer)=> {
-  console.log('segment.length ->', segment.length);
+const readFile = filepath => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filepath, (err, buffer) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(buffer);
+    });
+  });
+};
 
-  //if(segment.length < 20000) return
-  // seve segment
-  const filePath = path.resolve(__dirname, './', 'assets', './segments',  `${buffer.length}.wav`);
-  sveFile(filePath, buffer)
-    .then(() => console.log(`${segment.length} saved.`))
-    .catch(console.log);
-  
+segmenter.on('segment', segment=> {
+  console.log('segment.length ->', segment.length);
   const { spectrum } = fft(segment);
   const energy = getEnergy(spectrum , 10);
 
@@ -40,44 +42,20 @@ segmenter.on('noSegment', () => {
 });
 
 
-
-const readFile = filepath => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filepath, (err, buffer) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(buffer);
-    });
-  });
-};
-
-const sveFile = (filePath, buffer) => new Promise((resolve, reject) => {
-  fs.writeFile(filePath, buffer, err => {
-    if(err) {
-      reject(err);
-    }
-    resolve();
-  });
-});
-
-
 const getRecorded = async () => {
   const name = process.argv[2];
   const filePath = path.resolve(__dirname, './', 'assets', `${name}.wav`);
 
   try {
-
     const buffer = await readFile(filePath);
     const step = 16384;
 
     for (let index = step; index < buffer.length; index = index + step) {
       const slice = buffer.slice(index, step + index);
-      const withHeader = Buffer.concat([header(micSettings.rate  * 1024, micSettings), slice]);
+      const withHeader = Buffer.concat([header(micSettings.rate * 1024, micSettings), slice]);
       const audioData = await WavDecoder.decode(withHeader);
       const wave = audioData.channelData[0];
-      segmenter.findSegmant(wave, withHeader);
-      //console.log('sum ->', segmenter.getSum(wave))
+      segmenter.findSegment(wave, withHeader);
     }
     
   } catch (error) {
